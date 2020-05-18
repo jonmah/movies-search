@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import './App.css'
+import { getSearch } from './api/omdb'
 import { Header, Movie, Search } from './components'
-
-const MOVIE_API_URL = 'https://www.omdbapi.com/?s=man&apikey=4a3b711b' // you should replace this with yours
 
 const App = () => {
   const [loading, setLoading] = useState(true)
@@ -10,29 +9,24 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
-    fetch(MOVIE_API_URL)
-      .then(response => response.json())
-      .then(jsonResponse => {
-        setMovies(jsonResponse.Search)
-        setLoading(false)
-      })
+    getSearch('man').then(r => {
+      setMovies(r.Search)
+      setLoading(false)
+    })
   }, [])
 
   const search = searchValue => {
     setLoading(true)
     setErrorMessage(null)
 
-    fetch(`https://www.omdbapi.com/?s=${searchValue}&apikey=4a3b711b`)
-      .then(response => response.json())
-      .then(jsonResponse => {
-        if (jsonResponse.Response === 'True') {
-          setMovies(jsonResponse.Search)
-          setLoading(false)
-        } else {
-          setErrorMessage(jsonResponse.Error)
-          setLoading(false)
-        }
-      })
+    getSearch(searchValue).then(r => {
+      if (r.Error) {
+        setErrorMessage(r.Error)
+      } else {
+        setMovies(r.Search)
+      }
+      setLoading(false)
+    })
   }
 
   return (
